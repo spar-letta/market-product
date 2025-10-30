@@ -22,7 +22,7 @@ public class SecurityConfiguration {
                         auth -> auth
                                 .opaqueToken(  // user-management-service  localhost
                                         opaqueTokenConfigurer -> opaqueTokenConfigurer
-                                                .introspectionUri("http://localhost:8081/oauth2/introspect")
+                                                .introspectionUri("http://user-management-service:8081/oauth2/introspect")
                                                 .introspectionClientCredentials("browser-client", "secret")
                                                 .authenticationConverter(opaqueTokenAuthenticationConverter)));
 
