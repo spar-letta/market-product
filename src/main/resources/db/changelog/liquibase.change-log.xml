@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.14.xsd">
+
+    <changeSet id="20251024 17:36" author="enock">
+        <sql>
+            CREATE SCHEMA IF NOT EXISTS market_product;
+        </sql>
+    </changeSet>
+
+    <changeSet id="20251024 17:38" author="enock">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="products" schemaName="market_product"/>
+            </not>
+        </preConditions>
+        <createTable tableName="products" schemaName="market_product">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="public_id" type="uuid"/>
+            <column name="date_created" type="timestamp"/>
+            <column name="date_modified" type="timestamp"/>
+            <column name="modified_by" type="BIGINT"/>
+            <column name="created_by_id" type="BIGINT"/>
+            <column name="deleted" type="boolean" defaultValueBoolean="false"/>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="currency" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(255)"/>
+            <column name="price" type="numeric(11,2)"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="products"
+                                 baseTableSchemaName="market_product" constraintName="created_by_id_table_products"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users"
+                                 referencedTableSchemaName="public"/>
+        <addForeignKeyConstraint baseColumnNames="modified_by" baseTableName="products"
+                                 baseTableSchemaName="market_product" constraintName="modified_by_table_products"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users"
+                                 referencedTableSchemaName="public"/>
+    </changeSet>
+
+    <changeSet id="20251029 17:09" author="enock">
+        <preConditions>
+            <not>
+                <tableExists schemaName="market_product" tableName="product_like_users"/>
+            </not>
+        </preConditions>
+        <createTable schemaName="market_product" tableName="product_like_users">
+            <column name="product_like_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="product_like_id"
+                                 baseTableName="product_like_users"
+                                 baseTableSchemaName="market_product"
+                                 constraintName="fk_product_like_id_user_id_table_product_like_users"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="products"
+                                 referencedTableSchemaName="market_product"/>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="product_like_users"
+                                 baseTableSchemaName="market_product"
+                                 constraintName="fk_user_id_table_product_like_users"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users"
+                                 referencedTableSchemaName="public"/>
+        <addUniqueConstraint columnNames="product_like_id, user_id"
+                             tableName="product_like_users"
+                             schemaName="market_product"
+                             constraintName="unique_product_like_id_user_id_table_product_like_users"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    active: docker  # Change to 'docker' when running in Docker
+
+server:
+  servlet:
+    context-path: /
+  port: 8082
+
+  application:
+    name: product-service

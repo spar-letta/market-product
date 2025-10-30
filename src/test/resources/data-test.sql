@@ -1,0 +1,7 @@
+-- users
+insert into public.users (id, public_id, user_name, deleted, contact_email, first_name, last_name, other_name, user_code_number) values (1,'7a40fd66-36a6-4487-9509-e9b12a61bff9','testuser',false,'admin@gmail.com','peterKason', 'last_name', 'other_name', 'b56c34b7-85c6-483a-9ab0-fea21cbd269e');
+insert into public.users (id, public_id, user_name, deleted, contact_email, first_name, last_name, other_name, user_code_number) values (2,'2d7c44c0-3e3c-415d-b4e3-feb799f41e04','Cao',false,'xueqin@gmail.com','Xueqin', 'last_name', 'other_name','f9e54f25-1cc6-433e-bfbe-ab7e09613bbe');
+insert into public.users (id, public_id, user_name, deleted, contact_email, first_name, last_name, other_name, user_code_number) values (3,'054e1a02-9cd4-476b-bb4b-22fda2ef02df','Charles',false,'dickens@gmail.com','Dickens', 'last_name', 'other_name', '79854bc3-d7b8-48c4-a8e8-a94b66137da6');
+insert into public.users (id, public_id, user_name, deleted, contact_email, first_name, last_name, other_name, user_code_number) values (4,'7ba79c3b-f16b-44da-9696-0174e36d7021','Agatha',false,'christie@gmail.com','Christie', 'last_name', 'other_name', '76d9c23a-4547-4534-9726-54fd08b29541');
+
+insert into public.users (public_id, first_name, last_name, other_name, user_name,id, user_code_number) values ('e76345b6-8c1e-4aa2-9512-39467e6ec336', 'John', 'Doe', 'Jr.', 'testing@yopmail.com', 100, '68670812-ef02-43d8-974f-c23a98fe0e03');
