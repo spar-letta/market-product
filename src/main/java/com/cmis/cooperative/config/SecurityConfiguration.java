@@ -32,9 +32,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(antMatcher("/swagger-ui/**")).permitAll()
                                 .requestMatchers(antMatcher("/api-docs/**")).permitAll()
                                 .requestMatchers(antMatcher("/api-docs-ui.html")).permitAll()
-                                .requestMatchers(antMatcher("/cooperative-service/v3/**")).permitAll()
+                                .requestMatchers(antMatcher("/product-service/v3/**")).permitAll()
                                 .requestMatchers(antMatcher("/internal/**")).permitAll()
-                                .requestMatchers(antMatcher("/products/**")).permitAll()
                                 .anyRequest()
                                 .authenticated()
         );
