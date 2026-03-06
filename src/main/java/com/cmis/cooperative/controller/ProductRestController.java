@@ -5,6 +5,7 @@ import com.cmis.cooperative.model.Product;
 import com.cmis.cooperative.model.dataType.ProductStatus;
 import com.cmis.cooperative.model.dto.LikeResponse;
 import com.cmis.cooperative.model.dto.ProductRequestDto;
+import com.cmis.cooperative.model.response.ProductDtoResponse;
 import com.cmis.cooperative.service.ProductService;
 import com.cmis.cooperative.views.BaseView;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -35,13 +36,12 @@ public class ProductRestController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('CREATE_PRODUCT')")
-    @JsonView(BaseView.ProductView.class)
     @Operation(summary = "create product details", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", schema = @Schema(example = "")))
     }, requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(examples = {
             @ExampleObject(name = "create product details", value = Examples.PRODUCT_DETAILS_REQUEST)})))
-    public Product createProduct(@RequestBody ProductRequestDto productRequestDto,
-                                 @Parameter(hidden = true) Authentication loggedInUser) {
+    public ProductDtoResponse createProduct(@RequestBody ProductRequestDto productRequestDto,
+                                            @Parameter(hidden = true) Authentication loggedInUser) {
         return productService.createProduct(productRequestDto, loggedInUser);
     }
 
@@ -49,8 +49,8 @@ public class ProductRestController {
     @PreAuthorize("hasAuthority('READ_PRODUCTS')")
     @Operation(summary = "Read all products", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", schema = @Schema(example = "")))})
-    @JsonView(BaseView.ProductView.class)
-    public Page<Product> getAllProducts(
+//    @JsonView(BaseView.ProductView.class)
+    public Page<ProductDtoResponse> getAllProducts(
             @RequestParam(name = "searchParam", required = false) String searchParam,
             @RequestParam(name = "status", required = false) ProductStatus status,
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") @Parameter(example = "dd-MM-yyyy") LocalDate startDate,
@@ -98,7 +98,7 @@ public class ProductRestController {
     @Operation(summary = "create like", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", schema = @Schema(example = "")))
     }, requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(examples = {
-            @ExampleObject(name = "create product details", value = Examples.PRODUCT_DETAILS_REQUEST)})))
+            @ExampleObject(name = "create product details", value = "")})))
     public void makeLike(@PathVariable(name = "publicId") UUID productPublicId,
                          @Parameter(hidden = true) Authentication loggedInUser) {
         productService.makeLike(productPublicId, loggedInUser);
@@ -108,7 +108,7 @@ public class ProductRestController {
     @PreAuthorize("hasAuthority('READ_LIKES')")
     @Operation(summary = "Read product like", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", schema = @Schema(example = "")))})
-    @JsonView(BaseView.ProductView.class)
+//    @JsonView(BaseView.ProductView.class)
     public LikeResponse getProductLike(@PathVariable(name = "publicId") UUID publicId,
                                        @Parameter(hidden = true) Authentication loggedInUser) {
         return productService.getProductLike(publicId, loggedInUser);

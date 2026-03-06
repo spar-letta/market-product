@@ -20,6 +20,7 @@ public class ProductRestControllerTests extends ProductApplicationTests {
                 .name("Bathroom Mirror")
                 .description("Test Product description")
                 .price(new BigDecimal(240.00))
+                .ownerPublicId(UUID.fromString("2d7c44c0-3e3c-415d-b4e3-feb799f41e04"))
                 .build();
 
         given()
@@ -54,6 +55,7 @@ public class ProductRestControllerTests extends ProductApplicationTests {
                 .name("Tea cup")
                 .description("Tea Cup description")
                 .price(new BigDecimal(210.00))
+                .ownerPublicId(UUID.fromString("2d7c44c0-3e3c-415d-b4e3-feb799f41e04"))
                 .build();
 
         String productPublicId = given()
@@ -99,6 +101,7 @@ public class ProductRestControllerTests extends ProductApplicationTests {
                 .name("Laptop charger")
                 .description("laptop description")
                 .price(new BigDecimal(6900))
+                .ownerPublicId(UUID.fromString("2d7c44c0-3e3c-415d-b4e3-feb799f41e04"))
                 .build();
 
         String productPublicId = given()

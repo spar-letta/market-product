@@ -29,6 +29,7 @@ public class User implements Serializable {
     @JsonView({BaseView.ProductView.class})
     private UUID publicId;
 
+    @JsonView(BaseView.ProductView.class)
     @Column(name = "first_name", updatable = false, insertable = false)
     private String firstName;
 

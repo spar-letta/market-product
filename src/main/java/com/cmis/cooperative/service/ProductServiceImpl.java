@@ -4,10 +4,13 @@ import com.cmis.cooperative.model.Product;
 import com.cmis.cooperative.model.dataType.ProductStatus;
 import com.cmis.cooperative.model.dto.LikeResponse;
 import com.cmis.cooperative.model.dto.ProductRequestDto;
+import com.cmis.cooperative.model.response.ProductDtoResponse;
 import com.cmis.cooperative.model.vo.User;
 import com.cmis.cooperative.repository.ProductRepository;
 import com.cmis.cooperative.repository.UserRepository;
 import com.cmis.cooperative.utils.ThrowError;
+import com.cmis.cooperative.utils.converter.Converter;
+import com.cmis.cooperative.utils.converter.ProductToProductDtoResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -41,13 +44,20 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ThrowError throwError;
     private final UserRepository userRepository;
+    private final ProductToProductDtoResponse productToProductDtoResponse;
+    private final Converter<Product, ProductDtoResponse> converter;
 
     @Override
-    public Product createProduct(ProductRequestDto productRequestDto, Authentication loggedInUser) {
+    public ProductDtoResponse createProduct(ProductRequestDto productRequestDto, Authentication loggedInUser) {
         User user = validateUserUsername(loggedInUser.getName());
         Product foundProduct = productRepository.findByNameIgnoreCase(productRequestDto.name().trim()).orElse(null);
         if (foundProduct != null) {
             throwError.throwException(String.format("Product %s already exits", productRequestDto.name().trim()));
+        }
+
+        User owner = userRepository.findByPublicId(productRequestDto.ownerPublicId()).orElse(null);
+        if (owner == null) {
+            throwError.throwException("Missing product owner");
         }
 
         Product product = new Product();
@@ -56,51 +66,80 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(productRequestDto.price());
         product.setStatus(ProductStatus.NEW);
         product.setCreatedBy(user);
+        product.setOwnedBY(owner);
+        Product savedProduct = productRepository.save(product);
 
-        return productRepository.save(product);
+        ProductDtoResponse dto = converter.convert(savedProduct);
+
+        return dto;
     }
 
     @Override
-    public Page<Product> getProducts(String searchParam, LocalDate startDate, LocalDate endDate, ProductStatus status, Pageable pageable) {
+    public Page<ProductDtoResponse> getProducts(String searchParam,
+                                                LocalDate startDate,
+                                                LocalDate endDate,
+                                                ProductStatus status,
+                                                Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Product> cq = cb.createQuery(Product.class);
         Root<Product> root = cq.from(Product.class);
 
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-
-        cq.distinct(true);
-
-        final List<Predicate> andPredicates = new ArrayList<>();
-
-        Predicate deletedPredicate = cb.equal(root.get("deleted"), Boolean.FALSE);
-        andPredicates.add(deletedPredicate);
+        List<Predicate> andPredicates = new ArrayList<>();
+        andPredicates.add(cb.equal(root.get("deleted"), Boolean.FALSE));
 
         if (status != null) {
-            Predicate newPredicate = cb.equal(root.get("status"), status);
-            andPredicates.add(newPredicate);
+            andPredicates.add(cb.equal(root.get("status"), status));
         }
 
         if (startDate != null && endDate != null) {
             LocalDateTime startDateTime = startDate.atStartOfDay();
-            LocalDateTime endDateTime = endDate.atStartOfDay();
-            Predicate newPredicate = cb.between(root.get("dateRegistered"), startDateTime, endDateTime);
-            andPredicates.add(newPredicate);
+            LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+            andPredicates.add(cb.between(root.get("dateRegistered"), startDateTime, endDateTime));
         }
 
         if (searchParam != null && searchParam.trim().length() >= 3) {
-            final List<Predicate> orPredicates = new ArrayList<>();
-            orPredicates.add(cb.like(cb.upper(root.get("name")), "%" + searchParam.toUpperCase() + "%"));
-            Predicate p = cb.or(orPredicates.toArray(new Predicate[orPredicates.size()]));
-            andPredicates.add(p);
+            andPredicates.add(cb.like(cb.upper(root.get("name")), "%" + searchParam.toUpperCase() + "%"));
         }
 
-        cq.where(andPredicates.toArray(new Predicate[andPredicates.size()])).orderBy(cb.desc(root.get("id")));
+        cq.where(andPredicates.toArray(new Predicate[0]))
+                .orderBy(cb.desc(root.get("id")));
 
-        TypedQuery<Product> query = entityManager.createQuery(cq).setMaxResults(pageable.getPageSize()).setFirstResult(pageable.getPageNumber() * pageable.getPageSize());
-        List<Product> queryResultList = query.getResultList();
+        TypedQuery<Product> query = entityManager.createQuery(cq)
+                .setMaxResults(pageable.getPageSize())
+                .setFirstResult((int) pageable.getOffset());
+        List<Product> products = query.getResultList();
 
-        return new PageImpl<>(queryResultList, pageable, queryResultList.size());
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Product> countRoot = countQuery.from(Product.class);
+
+        List<Predicate> countPredicates = new ArrayList<>();
+        countPredicates.add(cb.equal(countRoot.get("deleted"), Boolean.FALSE));
+
+        if (status != null) {
+            countPredicates.add(cb.equal(countRoot.get("status"), status));
+        }
+
+        if (startDate != null && endDate != null) {
+            LocalDateTime startDateTime = startDate.atStartOfDay();
+            LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+            countPredicates.add(cb.between(countRoot.get("dateRegistered"), startDateTime, endDateTime));
+        }
+
+        if (searchParam != null && searchParam.trim().length() >= 3) {
+            countPredicates.add(cb.like(cb.upper(countRoot.get("name")), "%" + searchParam.toUpperCase() + "%"));
+        }
+
+        countQuery.select(cb.countDistinct(countRoot));
+        countQuery.where(countPredicates.toArray(new Predicate[0]));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        List<ProductDtoResponse> dtoList = products.stream()
+                .map(converter::convert)
+                .toList();
+
+        return new PageImpl<>(dtoList, pageable, total);
     }
+
 
     @Override
     public Product updateProduct(UUID publicId, ProductRequestDto productRequestDto, Authentication loggedInUser) {

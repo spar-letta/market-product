@@ -51,6 +51,11 @@ public class Product extends BaseEntity{
     @JsonView({BaseView.ProductView.class})
     private ProductStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "owned_by_id", referencedColumnName = "id")
+    @JsonView({BaseView.ProductView.class})
+    private User ownedBY;
+
     @ManyToMany
     @JoinTable(name = "product_like_users", schema = "market_product",
             joinColumns = @JoinColumn(name = "product_like_id", referencedColumnName = "id"),

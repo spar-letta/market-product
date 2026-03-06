@@ -32,6 +32,7 @@
             <column name="currency" type="VARCHAR(255)"/>
             <column name="status" type="VARCHAR(255)"/>
             <column name="price" type="numeric(11,2)"/>
+            <column name="owned_by_id" type="bigint"/>
         </createTable>
         <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="products"
                                  baseTableSchemaName="market_product" constraintName="created_by_id_table_products"
@@ -40,6 +41,11 @@
                                  referencedTableSchemaName="public"/>
         <addForeignKeyConstraint baseColumnNames="modified_by" baseTableName="products"
                                  baseTableSchemaName="market_product" constraintName="modified_by_table_products"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users"
+                                 referencedTableSchemaName="public"/>
+        <addForeignKeyConstraint baseColumnNames="owned_by_id" baseTableName="products"
+                                 baseTableSchemaName="market_product" constraintName="owned_by_id_table_products"
                                  deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
                                  referencedColumnNames="id" referencedTableName="users"
                                  referencedTableSchemaName="public"/>
@@ -78,4 +84,48 @@
                              schemaName="market_product"
                              constraintName="unique_product_like_id_user_id_table_product_like_users"/>
     </changeSet>
+
+    <changeSet id="20260224 16:25" author="enock">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="product_comments" schemaName="market_product"/>
+            </not>
+        </preConditions>
+        <createTable tableName="product_comments" schemaName="market_product">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="public_id" type="uuid"/>
+            <column name="date_created" type="timestamp"/>
+            <column name="date_modified" type="timestamp"/>
+            <column name="modified_by" type="BIGINT"/>
+            <column name="created_by_id" type="BIGINT"/>
+            <column name="deleted" type="boolean" defaultValueBoolean="false"/>
+
+            <column name="comment" type="VARCHAR(500)"/>
+            <column name="parent_comment_id" type="BIGINT"/>
+            <column name="product_id" type="BIGINT"/>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="created_by_id" baseTableName="product_comments"
+                                 baseTableSchemaName="market_product" constraintName="created_by_id_table_product_comments"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users"
+                                 referencedTableSchemaName="public"/>
+        <addForeignKeyConstraint baseColumnNames="modified_by" baseTableName="product_comments"
+                                 baseTableSchemaName="market_product" constraintName="modified_by_table_product_comments"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="users"
+                                 referencedTableSchemaName="public"/>
+        <addForeignKeyConstraint baseColumnNames="parent_comment_id" baseTableName="product_comments"
+                                 baseTableSchemaName="market_product" constraintName="parent_comment_id_table_product_comments"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="product_comments"
+                                 referencedTableSchemaName="market_product"/>
+        <addForeignKeyConstraint baseColumnNames="product_id" baseTableName="product_comments"
+                                 baseTableSchemaName="market_product" constraintName="product_id_table_product_comments"
+                                 deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="products"
+                                 referencedTableSchemaName="market_product"/>
+    </changeSet>
+
 </databaseChangeLog>

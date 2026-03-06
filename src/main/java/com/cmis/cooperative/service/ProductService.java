@@ -4,6 +4,7 @@ import com.cmis.cooperative.model.Product;
 import com.cmis.cooperative.model.dataType.ProductStatus;
 import com.cmis.cooperative.model.dto.LikeResponse;
 import com.cmis.cooperative.model.dto.ProductRequestDto;
+import com.cmis.cooperative.model.response.ProductDtoResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -13,9 +14,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface ProductService {
-    Product createProduct(ProductRequestDto productRequestDto, Authentication loggedInUser);
+    ProductDtoResponse createProduct(ProductRequestDto productRequestDto, Authentication loggedInUser);
 
-    Page<Product> getProducts(String searchParam, LocalDate startDate, LocalDate endDate, ProductStatus status, Pageable pageable);
+    Page<ProductDtoResponse> getProducts(String searchParam, LocalDate startDate, LocalDate endDate, ProductStatus status, Pageable pageable);
 
     Product updateProduct(UUID publicId, ProductRequestDto productRequestDto, Authentication loggedInUser);
 
